@@ -23,3 +23,7 @@
 > [shared_ptr_valid.cc](./shared_ptr_valid.cc)
 > > NOTES:
 > > 智能指针的判断可以通过get()获取裸指针进行判断，也可以直接判断智能指针对象本身，因为重载了bool()操作符。
+
+> [shared_ptr_release.cc](./shared_ptr_release.cc)
+> > NOTES:
+> > 将智能指针赋值为nullptr，如只有它引用这个对象，那么这个对象将会析构。
