@@ -27,3 +27,7 @@
 > [shared_ptr_release.cc](./shared_ptr_release.cc)
 > > NOTES:
 > > 将智能指针赋值为nullptr，如只有它引用这个对象，那么这个对象将会析构。
+
+> [linux_file_op_mkdir.cc](./linux_file_op_mkdir.cc)
+> > NOTES:
+> > 使用了C++11的正则表达式来切分路径，然后重路径并创建不存在的目录。(bug:同路径下已存在同名文件则会创建失败)
