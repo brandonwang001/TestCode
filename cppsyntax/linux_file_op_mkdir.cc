@@ -33,9 +33,17 @@ int CreateDir(const std::string& path) {
   return 0;
 }
 
+int RemoveDir(const std::string& path) {
+  return remove(path.c_str());
+}
+
 int main() {
   std::string path{"./tmp///test/./test1/..///test2"};
   std::cout << CreateDir(path) << std::endl; 
   std::string path1{"/tmp///test0/./test1/..///test2"};
   std::cout << CreateDir(path1) << std::endl; 
+  std::string path2{"./test"};
+  std::cout << CreateDir(path2) << std::endl;
+
+  std::cout << RemoveDir("./tmp/test/test1") << std::endl;
 }

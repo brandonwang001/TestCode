@@ -31,3 +31,7 @@
 > [linux_file_op_mkdir.cc](./linux_file_op_mkdir.cc)
 > > NOTES:
 > > 使用了C++11的正则表达式来切分路径，然后重路径并创建不存在的目录。(bug:同路径下已存在同名文件则会创建失败)
+
+> [string_data_func.cc](./string_data_func.cc)
+> > NOTES:
+> > string类的data方法返回的是const char\*, 不能使用const_static<char*>转换后写入数据。
