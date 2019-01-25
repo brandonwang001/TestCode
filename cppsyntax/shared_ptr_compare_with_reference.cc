@@ -7,10 +7,14 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <iomanip>
+#include <sstream>
 
-#define VMRSS_LINE 21
+#define VMRSS_LINE 20
 #define VMSIZE_LINE 13
 #define PROCESS_ITEM 14
+
+//g++ shared_ptr_compare_with_reference.cc -o main --std=c++11
 
 unsigned int get_proc_mem(unsigned int pid){
 	char file_name[64]={0};
@@ -24,16 +28,16 @@ unsigned int get_proc_mem(unsigned int pid){
 	}
 	
 	char name[64];
-	int vmrss;
+	uint32_t vmrss;
 	for (int i=0; i<VMRSS_LINE;i++){
 		fgets(line_buff,sizeof(line_buff),fd);
-    std::cout << line_buff << std::endl;
 	}
 	
 	fgets(line_buff,sizeof(line_buff),fd);
+  std::cout << line_buff << std::endl;
 	sscanf(line_buff,"%s %d",name,&vmrss);
-	fclose(fd);
- 
+  
+  fclose(fd);
 	return vmrss;
 }
 
@@ -92,7 +96,9 @@ int main(int argc, char* argv[]) {
     gettimeofday(&start_time, NULL);
     for (uint32_t i = 0; i < 1000000; i++) {
       auto mem_index_ptr = std::make_shared<WalMemIndex>();
-      mem_index_ptr->stream_uuid = stream_uuid;
+      std::stringstream oss;
+      oss << std::setfill('@') << std::setw(times) << i << std::endl;
+      mem_index_ptr->stream_uuid = oss.str();
       mem_index_ptr->seq_id_start = 0;
       mem_index_ptr->seq_id_end = 65535;
       mem_index_ptr->record_id_start = 0;
@@ -100,13 +106,9 @@ int main(int argc, char* argv[]) {
       mem_index_ptr->offset = 65535;
       vec_index_ptr->push_back(mem_index_ptr);  
     }
-    uint64_t mem_used = 0;
     for (uint32_t i = 0; i < 1000000; i++) {
-      mem_used += sizeof((*vec_index_ptr)[i]);
-      mem_used += (*vec_index_ptr)[i]->stream_uuid.size();
       PrintMemIndex((*vec_index_ptr)[i]);
     }
-    std::cout << "mem_used : " << mem_used << std::endl;
     gettimeofday(&end_time, NULL);
     auto runTime = (end_time.tv_sec - start_time.tv_sec ) + (double)(end_time.tv_usec - start_time.tv_usec)/1000000;
     std::cout << "run_time : " << runTime << std::endl;
@@ -115,7 +117,9 @@ int main(int argc, char* argv[]) {
     gettimeofday(&start_time, NULL);
     for (uint32_t i = 0; i < 1000000; i++) {
       WalMemIndex mem_index;
-      mem_index.stream_uuid = stream_uuid;
+      std::stringstream oss;
+      oss << std::setfill('@') << std::setw(times) << i << std::endl;
+      mem_index.stream_uuid = oss.str();
       mem_index.seq_id_start = 0;
       mem_index.seq_id_end = 65535;
       mem_index.record_id_start = 0;
@@ -123,18 +127,14 @@ int main(int argc, char* argv[]) {
       mem_index.offset = 65535;
       vec_index->push_back(mem_index); 
     }
-    uint64_t mem_used = 0;
     for (uint32_t i = 0; i < 1000000; i++) {
-      mem_used += sizeof((*vec_index)[i]);
-      mem_used += (*vec_index)[i].stream_uuid.size();
       PrintMemIndex((*vec_index)[i]);
     }
-    std::cout << "mem_used : " << mem_used << std::endl;
     gettimeofday(&end_time, NULL);
     auto runTime = (end_time.tv_sec - start_time.tv_sec ) + (double)(end_time.tv_usec - start_time.tv_usec)/1000000;
-    std::cout << "runtime" << runTime << std::endl;
+    std::cout << "runtime : " << runTime << std::endl;
   }
   auto mem_size2 = get_proc_mem(pid);
-  std::cout << "VmRss : :" << mem_size2 - mem_size1 << std::endl; 
+  std::cout << "VmRss : " << mem_size2 - mem_size1 << std::endl; 
   return 0;
 }
