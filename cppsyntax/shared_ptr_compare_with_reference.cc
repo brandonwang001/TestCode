@@ -54,6 +54,8 @@ void PrintMemIndex(
   uint64_t record_id_start = mem_index->record_id_start;
   uint64_t record_id_end = mem_index->record_id_end;
   uint64_t offset = mem_index->offset;
+  uint64_t sum = seq_id_start + seq_id_end + record_id_start +
+      record_id_end + offset;
 }
 
 void PrintMemIndex(
@@ -64,35 +66,31 @@ void PrintMemIndex(
   uint64_t record_id_start = mem_index.record_id_start;
   uint64_t record_id_end = mem_index.record_id_end;
   uint64_t offset = mem_index.offset;
+  uint64_t sum = seq_id_start + seq_id_end + record_id_start +
+      record_id_end + offset;
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 2) {
+  if (argc != 3) {
     return 0;
   }
+  auto times = std::strtoul(argv[2], NULL, 10);
+  std::string stream_uuid(times, '1');
   auto dcase = std::strtoul(argv[1], NULL, 10);
   pid_t pid = getpid();
-  auto mem_index_ptr = std::make_shared<WalMemIndex>();
-  std::cout << sizeof(mem_index_ptr) << std::endl;
-  mem_index_ptr->stream_uuid = "12345678901234567890123456789012";
-  mem_index_ptr->seq_id_start = 0;
-  mem_index_ptr->seq_id_end = 65535;
-  mem_index_ptr->record_id_start = 0;
-  mem_index_ptr->record_id_end = 65535;
-  mem_index_ptr->offset = 65535;
-  std::cout << sizeof(mem_index_ptr) << std::endl;
-  std::cout << sizeof(*mem_index_ptr) << std::endl;
+  
   typedef std::vector<std::shared_ptr<WalMemIndex>> VecIndexPtr;
   typedef std::vector<WalMemIndex> VecIndex;
   
   auto vec_index_ptr = std::make_shared<VecIndexPtr>();
   auto vec_index = std::make_shared<VecIndex>();
-
-  auto mem_size1 = get_proc_mem(pid);
+  struct timeval start_time;
+  struct timeval end_time;
   if (dcase == 1) {  
-    for (int i = 0; i < 1000000; i++) {
+    gettimeofday(&start_time, NULL);
+    for (uint32_t i = 0; i < 1000000; i++) {
       auto mem_index_ptr = std::make_shared<WalMemIndex>();
-      mem_index_ptr->stream_uuid = "12345678901234567890123456789012";
+      mem_index_ptr->stream_uuid = stream_uuid;
       mem_index_ptr->seq_id_start = 0;
       mem_index_ptr->seq_id_end = 65535;
       mem_index_ptr->record_id_start = 0;
@@ -100,20 +98,40 @@ int main(int argc, char* argv[]) {
       mem_index_ptr->offset = 65535;
       vec_index_ptr->push_back(mem_index_ptr);  
     }
+    uint64_t mem_used = 0;
+    for (uint32_t i = 0; i < 1000000; i++) {
+      mem_used += sizeof((*vec_index_ptr)[i]);
+      mem_used += (*vec_index_ptr)[i]->stream_uuid.size();
+      PrintMemIndex((*vec_index_ptr)[i]);
+    }
+    std::cout << "mem_used : " << mem_used << std::endl;
+    gettimeofday(&end_time, NULL);
+    auto runTime = (end_time.tv_sec - start_time.tv_sec ) + (double)(end_time.tv_usec - start_time.tv_usec)/1000000;
+    std::cout << "run_time : " << runTime << std::endl;
   }
   if (dcase == 2){
-    for (int i = 0; i < 1000000; i++) {
+    gettimeofday(&start_time, NULL);
+    for (uint32_t i = 0; i < 1000000; i++) {
       WalMemIndex mem_index;
-      mem_index.stream_uuid = "12345678901234567890123456789012";
+      mem_index.stream_uuid = stream_uuid;
       mem_index.seq_id_start = 0;
       mem_index.seq_id_end = 65535;
       mem_index.record_id_start = 0;
       mem_index.record_id_end = 65535;
       mem_index.offset = 65535;
-      vec_index->push_back(*mem_index_ptr); 
+      vec_index->push_back(mem_index); 
     }
+    uint64_t mem_used = 0;
+    for (uint32_t i = 0; i < 1000000; i++) {
+      mem_used += sizeof((*vec_index)[i]);
+      mem_used += (*vec_index)[i].stream_uuid.size();
+      PrintMemIndex((*vec_index)[i]);
+    }
+    std::cout << "mem_used : " << mem_used << std::endl;
+    gettimeofday(&end_time, NULL);
+    auto runTime = (end_time.tv_sec - start_time.tv_sec ) + (double)(end_time.tv_usec - start_time.tv_usec)/1000000;
+    std::cout << "runtime" << runTime << std::endl;
   }
-  auto mem_size2 = get_proc_mem(pid);
-  std::cout << mem_size2 - mem_size1 << std::endl;
+  
   return 0;
 }
