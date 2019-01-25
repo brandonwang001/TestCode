@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define VMRSS_LINE 17
+#define VMRSS_LINE 21
 #define VMSIZE_LINE 13
 #define PROCESS_ITEM 14
 
@@ -25,8 +25,9 @@ unsigned int get_proc_mem(unsigned int pid){
 	
 	char name[64];
 	int vmrss;
-	for (int i=0; i<VMRSS_LINE-1;i++){
+	for (int i=0; i<VMRSS_LINE;i++){
 		fgets(line_buff,sizeof(line_buff),fd);
+    std::cout << line_buff << std::endl;
 	}
 	
 	fgets(line_buff,sizeof(line_buff),fd);
@@ -86,6 +87,7 @@ int main(int argc, char* argv[]) {
   auto vec_index = std::make_shared<VecIndex>();
   struct timeval start_time;
   struct timeval end_time;
+  auto mem_size1 = get_proc_mem(pid);
   if (dcase == 1) {  
     gettimeofday(&start_time, NULL);
     for (uint32_t i = 0; i < 1000000; i++) {
@@ -132,6 +134,7 @@ int main(int argc, char* argv[]) {
     auto runTime = (end_time.tv_sec - start_time.tv_sec ) + (double)(end_time.tv_usec - start_time.tv_usec)/1000000;
     std::cout << "runtime" << runTime << std::endl;
   }
-  
+  auto mem_size2 = get_proc_mem(pid);
+  std::cout << "VmRss : :" << mem_size2 - mem_size1 << std::endl; 
   return 0;
 }
